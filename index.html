@@ -1,0 +1,749 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Expense Tracker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#008000">
+    <style>
+        body {
+            background: #f1f3f6;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .balance {
+            font-size: 30px;
+            color: green;
+            font-weight: bold;
+        }
+
+        button {
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            width: 48%;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .income {
+            background: green;
+        }
+
+        .expense {
+            background: crimson;
+        }
+
+        .history {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+        }
+
+        .transaction {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .plus {
+            color: green;
+        }
+
+        .minus {
+            color: crimson;
+        }
+    
+      .delete-btn {
+    width: auto;
+    padding: 7px 12px;
+    margin: 0;
+    background: #555;
+    font-size: 12px;
+}
+
+.transaction {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+      .transaction-date {
+    display: block;
+    color: gray;
+    font-size: 11px;
+    margin-top: 5px;
+  }
+
+      .summary {
+    margin-bottom: 20px;
+}
+
+.summary h3 {
+    text-align: center;
+}
+      .transaction-category {
+    display: block;
+    color: #777;
+    font-size: 12px;
+    margin-top: 4px;
+      }
+
+      .analytics-item {
+    margin: 15px 0;
+}
+
+.analytics-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+}
+
+.progress-bg {
+    background: #eee;
+    height: 10px;
+    border-radius: 10px;
+    margin-top: 6px;
+}
+
+.progress-fill {
+    height: 10px;
+    background: #28a745;
+    border-radius: 10px;
+}
+ .edit-btn {
+    background: orange;
+    color: white;
+    border: none;
+    width: auto;
+    padding: 7px 12px;
+    margin: 0;
+    font-size: 12px;
+    border-radius: 5px;
+    cursor: pointer;
+ }
+   /* Card improvements */
+.card,
+.history {
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Search bar */
+.history input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+/* Transaction layout */
+.transaction > span {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+/* Transaction buttons */
+.transaction button {
+    transition: opacity 0.2s;
+}
+
+.transaction button:active {
+    opacity: 0.7;
+}
+
+/* Smooth cards */
+.card,
+.history {
+    transition: box-shadow 0.2s;
+}
+
+/* Smaller screens */
+@media (max-width: 480px) {
+    body {
+        padding: 12px;
+    }
+
+    .transaction {
+        gap: 6px;
+        padding: 12px 5px;
+    }
+
+    .balance {
+        font-size: 26px;
+    }
+      }
+
+      #lockScreen {
+    position: fixed;
+    inset: 0;
+    background: #f1f3f6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.lock-box {
+    background: white;
+    padding: 30px 20px;
+    border-radius: 15px;
+    text-align: center;
+    width: 100%;
+    max-width: 300px;
+    box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+}
+
+.lock-box input {
+    width: 90%;
+    padding: 12px;
+    margin: 15px 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 20px;
+    box-sizing: border-box;
+}
+
+.lock-box button {
+    width: 100%;
+    background: green;
+}
+
+#pinError {
+    color: crimson;
+    font-size: 13px;
+}
+
+      
+    </style>
+</head>
+
+<body>
+<div id="lockScreen">
+    <div class="lock-box">
+        <h2>🔒 Welcome Back</h2>
+        <p>Enter your PIN to continue</p>
+
+        <input
+            type="password"
+            id="pinInput"
+            placeholder="Enter PIN"
+            maxlength="6"
+            inputmode="numeric"
+        >
+
+        <button onclick="unlockApp()">
+            Unlock
+        </button>
+
+        <p id="pinError"></p>
+    </div>
+</div>
+    <h1>My Expense Tracker</h1>
+
+    <div class="card">
+        <p>Total Balance</p>
+        <p class="balance" id="balance">₱0.00</p>
+    </div>
+ 
+  <div class="card summary">
+    <h3>This Month's Summary</h3>
+
+    <p>Total Income</p>
+    <p class="plus" id="monthlyIncome">₱0.00</p>
+
+    <p>Total Expenses</p>
+    <p class="minus" id="monthlyExpense">₱0.00</p>
+
+    <p>Monthly Difference</p>
+    <p id="monthlyDifference">₱0.00</p>
+  </div>
+
+  <div class="card">
+    <h3>Spending Analytics</h3>
+    <div id="analytics">
+        No expenses recorded yet.
+    </div>
+  </div>
+
+    <button class="income" onclick="addIncome()">
+        + Income
+    </button>
+
+    <button class="expense" onclick="addExpense()">
+        - Expense
+    </button>
+
+    <div class="history">
+        <h3>Transaction History</h3>
+      <input
+    type="text"
+    id="searchInput"
+    placeholder="Search transactions..."
+    oninput="searchTransactions()"
+>
+        <div id="history">
+            No transactions yet.
+        </div>
+    </div>
+  
+    <script>
+
+        
+let balance = Number(localStorage.getItem("balance")) || 0;
+
+let transactions =
+    JSON.parse(localStorage.getItem("transactions")) || [];
+// Demo PIN only — not secure
+const APP_PIN = "0000";
+
+function unlockApp() {
+    let enteredPIN = document.getElementById("pinInput").value;
+
+    if (enteredPIN === APP_PIN) {
+        document.getElementById("lockScreen").style.display = "none";
+        document.getElementById("pinError").innerText = "";
+    } else {
+        document.getElementById("pinError").innerText =
+            "Incorrect PIN. Try again.";
+
+        document.getElementById("pinInput").value = "";
+    }
+}
+      
+function updateBalance() {
+    document.getElementById("balance").innerText =
+        "₱" + balance.toFixed(2);
+
+    localStorage.setItem("balance", balance);
+}
+
+
+function displayHistory() {
+    let history = document.getElementById("history");
+
+    history.innerHTML = "";
+
+    if (transactions.length === 0) {
+        history.innerText = "No transactions yet.";
+        return;
+    }
+
+    transactions.forEach(function(item, index) {
+        let transaction = document.createElement("div");
+        transaction.className = "transaction";
+
+        let sign = item.type === "income" ? "+" : "-";
+        let color = item.type === "income" ? "plus" : "minus";
+
+        let details = document.createElement("span");
+
+        details.innerHTML =
+    `<strong>${item.description}</strong>
+    <span class="${color}">
+    ${sign}₱${Number(item.amount).toFixed(2)}
+    </span>
+    <small class="transaction-category">
+    Category: ${item.category || "Uncategorized"}
+    </small>
+    <small class="transaction-date">
+    ${item.date ? new Date(item.date).toLocaleString() : "Date unavailable"}
+    </small>`;
+
+        
+      let editButton = document.createElement("button");
+editButton.innerText = "Edit";
+editButton.className = "edit-btn";
+
+editButton.onclick = function() {
+    let newDescription = prompt(
+        "Edit description:",
+        item.description
+    );
+
+    if (!newDescription || !newDescription.trim()) return;
+
+    let newCategory = prompt(
+        "Edit category:",
+        item.category || "Other"
+    );
+
+    if (!newCategory || !newCategory.trim()) return;
+
+    let newAmount = Number(prompt(
+        "Edit amount:",
+        item.amount
+    ));
+
+    if (!Number.isFinite(newAmount) || newAmount <= 0) {
+        alert("Please enter a valid amount.");
+        return;
+    }
+
+    item.description = newDescription.trim();
+    item.category = newCategory.trim();
+    item.amount = newAmount;
+
+    balance = transactions.reduce(function(total, transaction) {
+        if (transaction.type === "income") {
+            return total + Number(transaction.amount);
+        } else {
+            return total - Number(transaction.amount);
+        }
+    }, 0);
+
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+
+    updateBalance();
+    displayHistory();
+    updateSummary();
+    updateAnalytics();
+};
+      let deleteButton = document.createElement("button");
+
+        deleteButton.className = "delete-btn";
+        deleteButton.innerText = "Delete";
+      
+        deleteButton.onclick = function() {
+            if (!confirm("Delete this transaction?")) return;
+
+            if (item.type === "income") {
+                balance -= Number(item.amount);
+            } else {
+                balance += Number(item.amount);
+            }
+
+            transactions.splice(index, 1);
+
+            localStorage.setItem(
+                "transactions",
+                JSON.stringify(transactions)
+            );
+
+            updateBalance();
+            displayHistory();
+        };
+
+        transaction.appendChild(details);
+        transaction.appendChild(editButton);
+        transaction.appendChild(deleteButton);
+       
+        history.prepend(transaction);
+    });
+
+}
+
+
+function addTransaction(type) {
+    let description = prompt("Enter description:");
+
+    if (!description || !description.trim()) return;
+    let category = prompt(
+    "Enter category:"
+);
+
+if (!category || !category.trim()) {
+    category = "Other";
+}
+
+    let amount = Number(prompt("Enter amount:"));
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+        alert("Please enter a valid amount.");
+        return;
+    }
+
+    if (type === "income") {
+        balance += amount;
+    } else {
+        balance -= amount;
+    }
+
+    transactions.push({
+    description: description.trim(),
+    amount: amount,
+    type: type,
+    category: category.trim(),
+    date: new Date().toISOString()
+});
+
+    localStorage.setItem(
+        "transactions",
+        JSON.stringify(transactions)
+    );
+
+    updateBalance();
+    displayHistory();
+    updateSummary();
+    updateAnalytics();
+    searchTransactions();
+     
+}
+
+function addIncome() {
+    addTransaction("income");
+}
+
+function addExpense() {
+    addTransaction("expense");
+}
+
+      
+function updateSummary() {
+    let monthlyIncome = 0;
+    let monthlyExpense = 0;
+
+    let today = new Date();
+
+    transactions.forEach(function(item) {
+        if (!item.date) return;
+
+        let transactionDate = new Date(item.date);
+
+        if (
+            transactionDate.getMonth() === today.getMonth() &&
+            transactionDate.getFullYear() === today.getFullYear()
+        ) {
+            if (item.type === "income") {
+                monthlyIncome += Number(item.amount);
+            } else {
+                monthlyExpense += Number(item.amount);
+            }
+        }
+    });
+
+    let difference = monthlyIncome - monthlyExpense;
+
+    document.getElementById("monthlyIncome").innerText =
+        "₱" + monthlyIncome.toFixed(2);
+
+    document.getElementById("monthlyExpense").innerText =
+        "₱" + monthlyExpense.toFixed(2);
+
+    document.getElementById("monthlyDifference").innerText =
+        "₱" + difference.toFixed(2);
+}
+
+      
+function updateAnalytics() {
+    let categoryTotals = {};
+    let totalExpenses = 0;
+
+    transactions.forEach(function(item) {
+
+        if (item.type === "expense") {
+
+            let category = item.category || "Uncategorized";
+
+            if (!categoryTotals[category]) {
+                categoryTotals[category] = 0;
+            }
+
+            categoryTotals[category] += Number(item.amount);
+            totalExpenses += Number(item.amount);
+        }
+    });
+
+    let analytics = document.getElementById("analytics");
+
+    analytics.innerHTML = "";
+
+    if (totalExpenses === 0) {
+        analytics.innerText = "No expenses recorded yet.";
+        return;
+    }
+
+    for (let category in categoryTotals) {
+
+        let amount = categoryTotals[category];
+
+        let percentage = (amount / totalExpenses) * 100;
+
+        let item = document.createElement("div");
+        item.className = "analytics-item";
+
+        item.innerHTML = `
+            <div class="analytics-label">
+                <strong>${category}</strong>
+                <span>₱${amount.toFixed(2)}</span>
+            </div>
+
+            <div class="progress-bg">
+                <div class="progress-fill"
+                style="width: ${percentage}%">
+                </div>
+            </div>
+
+            <small>${percentage.toFixed(1)}%</small>
+        `;
+
+        analytics.appendChild(item);
+    }
+}
+
+function searchTransactions() {
+    let searchText = document
+        .getElementById("searchInput")
+        .value.toLowerCase();
+
+    let history = document.getElementById("history");
+    history.innerHTML = "";
+
+    let filteredTransactions = transactions.filter(function(item) {
+        return (
+            item.description.toLowerCase().includes(searchText) ||
+            (item.category || "").toLowerCase().includes(searchText)
+        );
+    });
+
+    if (filteredTransactions.length === 0) {
+        history.innerText = "No matching transactions found.";
+        return;
+    }
+
+    filteredTransactions.forEach(function(item) {
+    let index = transactions.indexOf(item);
+
+    let transaction = document.createElement("div");
+    transaction.className = "transaction";
+
+    let sign = item.type === "income" ? "+" : "-";
+    let color = item.type === "income" ? "plus" : "minus";
+
+    let details = document.createElement("span");
+
+    details.innerHTML = `
+        <strong>${item.description}</strong>
+        <span class="${color}">
+            ${sign}₱${Number(item.amount).toFixed(2)}
+        </span>
+        <small>Category: ${item.category || "Uncategorized"}</small>
+    `;
+     let editButton = document.createElement("button");
+editButton.innerText = "Edit";
+editButton.className = "edit-btn";
+
+editButton.onclick = function() {
+    let newDescription = prompt(
+        "Edit description:",
+        item.description
+    );
+
+    if (!newDescription || !newDescription.trim()) return;
+
+    let newCategory = prompt(
+        "Edit category:",
+        item.category || "Other"
+    );
+
+    if (!newCategory || !newCategory.trim()) return;
+
+    let newAmount = Number(prompt(
+        "Edit amount:",
+        item.amount
+    ));
+
+    if (!Number.isFinite(newAmount) || newAmount <= 0) {
+        alert("Please enter a valid amount.");
+        return;
+    }
+
+    item.description = newDescription.trim();
+    item.category = newCategory.trim();
+    item.amount = newAmount;
+
+    balance = transactions.reduce(function(total, transaction) {
+        return transaction.type === "income"
+            ? total + Number(transaction.amount)
+            : total - Number(transaction.amount);
+    }, 0);
+
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+
+    updateBalance();
+    displayHistory();
+    updateSummary();
+    updateAnalytics();
+    searchTransactions();
+};
+      
+    let deleteButton = document.createElement("button");
+    deleteButton.className = "delete-btn";
+    deleteButton.innerText = "Delete";
+
+    deleteButton.onclick = function() {
+        if (!confirm("Delete this transaction?")) return;
+
+        if (item.type === "income") {
+            balance -= Number(item.amount);
+        } else {
+            balance += Number(item.amount);
+        }
+
+        transactions.splice(index, 1);
+
+        localStorage.setItem("transactions", JSON.stringify(transactions));
+
+        updateBalance();
+        displayHistory();
+        updateSummary();
+        updateAnalytics();
+        searchTransactions();
+    };
+
+    transaction.appendChild(details);
+transaction.appendChild(editButton);
+transaction.appendChild(deleteButton);
+history.appendChild(transaction);
+
+}); // End of filteredTransactions.forEach
+
+} // End of searchTransactions
+
+
+// Run when the page opens
+updateBalance();
+displayHistory();
+updateSummary();
+updateAnalytics();
+searchTransactions();
+
+</script>
+  
+<script>
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js")
+        .then(function() {
+            console.log("Service Worker registered!");
+        })
+        .catch(function(error) {
+            console.log("Service Worker error:", error);
+        });
+}
+</script>
+  
+</body>
+</html>
